@@ -6,7 +6,7 @@ from environs import Env
 @dataclass
 class tg_bot:
     token: str
-
+    admins: list[int]
 
 
 @dataclass
@@ -20,6 +20,7 @@ def load_config(path: str | None = None) -> Config:
 
     return Config(
         bot=tg_bot(
-            token=env('token')
+            token=env('token'),
+            admins=list(map(int, env.list('admins')))
             )
         )

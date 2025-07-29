@@ -12,7 +12,7 @@ from database.db_conf import database
 from middlewares.Transfer_middleware import TransferObjectsMiddleware
 from config_data.config import load_config, Config
 from handlers.user_handlers import user_router
-from dialogs.user_dialog.dialog import user_dialog
+from dialogs import get_dialogs
 
 
 format = '[{asctime}] #{levelname:8} {filename}:' \
@@ -28,8 +28,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 config: Config = load_config()
-#db = database('datas')
+#db = database('datas.sqlite3')
 #db.del_database()
+
+from pyrogram import utils
+
+
+def get_peer_type_new(peer_id: int) -> str:
+    peer_id_str = str(peer_id)
+    if not peer_id_str.startswith("-"):
+        return "user"
+    elif peer_id_str.startswith("-100"):
+        return "channel"
+    else:
+        return "chat"
+
+
+utils.get_peer_type = get_peer_type_new
 
 
 async def main():
@@ -41,7 +56,7 @@ async def main():
     dp = Dispatcher()
 
     # подключаем роутеры
-    dp.include_routers(user_router, user_dialog)
+    dp.include_routers(user_router, *get_dialogs())
 
     # подключаем middleware
     dp.update.middleware(TransferObjectsMiddleware())
